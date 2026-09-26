@@ -16,9 +16,9 @@ try {
 }
 
 if (renderer) {
-  document.documentElement.classList.add('webgl-ready');
-  canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); document.documentElement.classList.remove('webgl-ready'); }, false);
-  canvas.addEventListener('webglcontextrestored', () => document.documentElement.classList.add('webgl-ready'), false);
+  let renderedOnce = false;
+  canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); renderedOnce = false; document.documentElement.classList.remove('webgl-ready'); }, false);
+  canvas.addEventListener('webglcontextrestored', () => { renderedOnce = false; document.documentElement.classList.remove('webgl-ready'); }, false);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.65));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -209,6 +209,7 @@ if (renderer) {
     orbits[0].rotation.z=t*.045; orbits[1].rotation.z=-t*.035; orbits[2].rotation.z=t*.026;
     dustMat.uniforms.uTime.value=t;
     composer.render();
+    if (!renderedOnce) { renderedOnce = true; document.documentElement.classList.add('webgl-ready'); }
   }
   tick();
 }
@@ -219,7 +220,3 @@ nav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.hidden
 const header=document.querySelector('.site-header');
 const onScroll=()=>header.classList.toggle('scrolled',scrollY>40);
 addEventListener('scroll',onScroll,{passive:true});onScroll();
-const revealEls=[...document.querySelectorAll('.section-head,.cap-grid article,.proof-row b,.about-copy,.about-photo,.partner-copy,.partner-cards article,.contact>*')];
-revealEls.forEach(el=>{el.style.opacity='0';el.style.transform='translateY(22px)';});
-const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.animate([{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'translateY(0)'}],{duration:750,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'});io.unobserve(e.target);}}),{threshold:.12});
-revealEls.forEach(el=>io.observe(el));
