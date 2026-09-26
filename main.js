@@ -220,7 +220,7 @@ const genesisSection=document.querySelector('.mobius-section');
 if(genesisSection){
   const startGenesis=()=>initGenesis().catch(()=>document.documentElement.classList.add('no-webgl'));
   if('IntersectionObserver' in window){
-    const genesisObserver=new IntersectionObserver((entries,obs)=>{if(entries.some(e=>e.isIntersecting)){obs.disconnect();startGenesis();}},{rootMargin:'160px 0px'});
+    const genesisObserver=new IntersectionObserver((entries,obs)=>{if(entries.some(e=>e.isIntersecting)){obs.disconnect();startGenesis();}},{rootMargin:'0px',threshold:.01});
     genesisObserver.observe(genesisSection);
   }else{addEventListener('load',startGenesis,{once:true});}
 }
