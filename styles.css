@@ -55,3 +55,22 @@
 
 /* brand-kit fallback: circular stage language */
 .stage-fallback .rig{border-radius:50%;height:20px;border:2px solid rgba(235,180,78,.30);border-bottom:2px solid rgba(235,180,78,.20);transform:perspective(180px) rotateX(62deg)}
+
+/* ===== v3: photographic room + live Three.js genesis ===== */
+.hero{isolation:isolate;background:#020202;height:max(860px,100svh)}
+.stage-plate{position:absolute;inset:0;z-index:0;background-image:url('assets/stage-hero.jpg');background-size:cover;background-position:center 52%;filter:saturate(.96) contrast(1.03) brightness(.88);transform:scale(1.012);transform-origin:center;pointer-events:none}
+.hero canvas{z-index:2;background:transparent;pointer-events:none}
+.hero-ambient{z-index:3;background:
+  linear-gradient(90deg,#020202 0%,rgba(2,2,2,.94) 18%,rgba(2,2,2,.75) 31%,rgba(2,2,2,.28) 47%,rgba(2,2,2,.03) 64%,rgba(2,2,2,.12) 100%),
+  linear-gradient(180deg,#020202 0%,rgba(2,2,2,.48) 10%,transparent 28%,transparent 77%,#020202 100%),
+  radial-gradient(ellipse 50% 46% at 72% 44%,rgba(223,147,40,.08),transparent 70%)}
+.hero-copy{z-index:5;text-shadow:0 2px 28px rgba(0,0,0,.52)}
+.hero h1{font-weight:300;letter-spacing:-.045em}
+.monogram{font-family:"Avenir Next Condensed","Avenir Next","Helvetica Neue",Arial,sans-serif!important}
+@media(max-width:720px){
+  .hero{min-height:1160px;height:auto}
+  .stage-plate{background-image:url('assets/stage-hero-mobile.jpg');background-size:cover;background-position:center bottom;filter:saturate(.92) contrast(1.06) brightness(.76);top:44%;height:56%}
+  .hero-ambient{background:linear-gradient(180deg,#020202 0%,#020202 40%,rgba(2,2,2,.93) 49%,rgba(2,2,2,.15) 67%,rgba(2,2,2,.20) 88%,#020202 100%),radial-gradient(ellipse 92% 42% at 50% 72%,rgba(223,147,40,.10),transparent 72%)}
+  .hero-copy{padding:145px 20px 570px}
+  .hero h1{font-size:clamp(52px,14.5vw,76px)}
+}
