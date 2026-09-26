@@ -48,152 +48,128 @@ if (renderer) {
   panel(12, 3, 0xb86a1e, 1.6, [0, -4, 9], [0.6, 0, 0]);                 // amber under-bounce
   const envMap = pmrem.fromScene(envScene, 0.035).texture;
 
-  /* ---------- The stage: empty, unlit, far away ---------- */
+  /* ---------- Brand-kit stage: circular rig, haze, distant performance ---------- */
   const stage = new THREE.Group();
+  stage.position.set(0.85, -0.75, -5.35);
+  stage.scale.setScalar(1.14);
   scene.add(stage);
 
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(160, 160),
-    new THREE.MeshStandardMaterial({ color: 0x0b0a08, roughness: 0.62, metalness: 0.2 })
+    new THREE.PlaneGeometry(180, 180),
+    new THREE.MeshStandardMaterial({ color: 0x050403, roughness: 0.72, metalness: 0.12 })
   );
   floor.rotation.x = -Math.PI / 2; stage.add(floor);
 
-  const deckMat = new THREE.MeshStandardMaterial({ color: 0x0d0b09, roughness: 0.55, metalness: 0.25 });
-  const deck = new THREE.Mesh(new THREE.BoxGeometry(15, 1.15, 6), deckMat);
-  deck.position.set(0, 0.575, -1); stage.add(deck);
-  // lacquered deck surface — mirrors the gold above it
-  const deckTop = new THREE.Mesh(new THREE.PlaneGeometry(14.9, 5.9), new THREE.MeshStandardMaterial({ color: 0x120e0a, roughness: 0.18, metalness: 0.75, envMap, envMapIntensity: 0.08 }));
-  deckTop.rotation.x = -Math.PI / 2; deckTop.position.set(0, 1.152, -1); stage.add(deckTop);
-  // polished lip on the deck edge — catches the gold
-  const lip = new THREE.Mesh(new THREE.BoxGeometry(15.02, 0.05, 0.05), new THREE.MeshStandardMaterial({ color: 0x6b4a1c, roughness: 0.25, metalness: 1 }));
-  lip.position.set(0, 1.15, 2.0); stage.add(lip);
-  // step unit
-  const step = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.55, 0.9), deckMat);
-  step.position.set(0, 0.275, 2.45); stage.add(step);
+  const deckMat = new THREE.MeshStandardMaterial({ color: 0x090806, roughness: 0.42, metalness: 0.42 });
+  const deck = new THREE.Mesh(new THREE.CylinderGeometry(8.0, 8.35, 0.72, 96), deckMat);
+  deck.scale.z = 0.48; deck.position.set(0, 0.36, -1.6); stage.add(deck);
+  const lip = new THREE.Mesh(new THREE.TorusGeometry(8.08, 0.045, 12, 160), new THREE.MeshPhysicalMaterial({ color: 0xc79033, metalness: 1, roughness: 0.16, emissive: 0x2b1602, emissiveIntensity: 0.62 }));
+  lip.rotation.x = Math.PI / 2; lip.scale.y = 0.48; lip.position.set(0, 0.73, -1.6); stage.add(lip);
 
-  // back wall + wings: pure black masking
-  const maskMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.95, metalness: 0 });
-  const back = new THREE.Mesh(new THREE.PlaneGeometry(40, 18), new THREE.MeshBasicMaterial({ color: 0x030303 })); back.position.set(0, 9, -4.2); stage.add(back);
-
-  // box truss silhouette: two towers + header, thin and architectural
-  const trussMat = new THREE.MeshStandardMaterial({ color: 0x16130f, roughness: 0.45, metalness: 0.9 });
-  const truss = new THREE.Group(); stage.add(truss);
-  const bar = (len, axis, x, y, z) => {
-    const g = axis === 'y' ? new THREE.BoxGeometry(0.07, len, 0.07) : new THREE.BoxGeometry(len, 0.07, 0.07);
-    const m = new THREE.Mesh(g, trussMat); m.position.set(x, y, z); truss.add(m);
-  };
-  for (const x of [-7.2, 7.2]) for (const dx of [-0.25, 0.25]) for (const dz of [-0.25, 0.25]) bar(8.6, 'y', x + dx, 1.15 + 4.3, -2.6 + dz);
-  for (const dy of [-0.25, 0.25]) for (const dz of [-0.25, 0.25]) bar(14.9, 'x', 0, 9.2 + dy, -2.6 + dz);
-  // dark, unlit fixtures hanging from the header
-  const fixMat = new THREE.MeshStandardMaterial({ color: 0x0c0b0a, roughness: 0.35, metalness: 0.8 });
-  for (let i = -3; i <= 3; i++) {
-    const can = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.26, 0.62, 20), fixMat);
-    can.position.set(i * 1.9, 8.55, -2.6); can.rotation.x = 0.35; truss.add(can);
+  const trussMat = new THREE.MeshStandardMaterial({ color: 0x17130d, roughness: 0.34, metalness: 0.95 });
+  const ringRig = new THREE.Group(); ringRig.position.set(0, 8.25, -1.7); stage.add(ringRig);
+  for (const [r,tube,op] of [[6.9,.11,1],[5.9,.07,.82],[4.95,.045,.58]]) {
+    const m = new THREE.MeshStandardMaterial({ color: op===1?0x3b2914:0x513715, roughness:0.32, metalness:0.95, emissive:0x1d0e01, emissiveIntensity:.38*op });
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(r,tube,12,180),m); ring.rotation.x=1.18; ring.scale.y=.94; ringRig.add(ring);
   }
-  // speaker columns flanking
-  for (const x of [-8.6, 8.6]) {
-    const col = new THREE.Mesh(new THREE.BoxGeometry(1.0, 3.8, 1.0), fixMat);
-    col.position.set(x, 1.9, 0.6); stage.add(col);
+  const practicalGeo=new THREE.SphereGeometry(.055,10,8);
+  const practicalMat=new THREE.MeshBasicMaterial({color:0xffc96f,transparent:true,opacity:.9});
+  for(let i=0;i<28;i++){
+    const a=i/28*Math.PI*2, rr=6.55, th=1.18; const l=new THREE.Mesh(practicalGeo,practicalMat);
+    const sy=Math.sin(a)*rr; l.position.set(Math.cos(a)*rr,sy*Math.cos(th)-.10,sy*Math.sin(th)); ringRig.add(l);
+  }
+  const stageGlow=new THREE.PointLight(0xffb45a,11,24,1.8); stageGlow.position.set(0,4.3,1.8); stage.add(stageGlow);
+  const rimGlow=new THREE.PointLight(0xffd18c,7,18,2); rimGlow.position.set(-4.2,5.2,2.0); stage.add(rimGlow);
+  const lampMat = new THREE.MeshStandardMaterial({ color:0x0b0907,roughness:.28,metalness:.88 });
+  const beamMat = new THREE.MeshBasicMaterial({ color:0xffbd65,transparent:true,opacity:.044,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide });
+  const beamMatHot = new THREE.MeshBasicMaterial({ color:0xffd690,transparent:true,opacity:.068,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide });
+  for(let i=0;i<14;i++){
+    const a=i/14*Math.PI*2, rx=Math.cos(a)*5.7, rz=Math.sin(a)*3.75;
+    const can=new THREE.Mesh(new THREE.CylinderGeometry(.13,.18,.42,16),lampMat); can.position.set(rx,-.18,rz); ringRig.add(can);
+    if(i%2===0 || i===3 || i===11){
+      const target=new THREE.Vector3(Math.cos(a)*2.2,-8.0,Math.sin(a)*1.1-0.2);
+      const from=new THREE.Vector3(rx,-.32,rz); const dir=target.clone().sub(from); const len=dir.length();
+      const beam=new THREE.Mesh(new THREE.ConeGeometry(i%4===0?.72:.5,len,28,1,true),i%4===0?beamMatHot:beamMat.clone());
+      beam.position.copy(from.clone().add(target).multiplyScalar(.5));
+      beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0),dir.clone().normalize());
+      ringRig.add(beam);
+    }
   }
 
-  /* ---------- The Genesis object: molten gold Möbius ---------- */
+  // distant band line — enough human scale to read as a live room, never a foreground silhouette
+  const blackMat = new THREE.MeshBasicMaterial({ color:0x010101 });
+  const riser = new THREE.Mesh(new THREE.BoxGeometry(7.0,.34,1.2),blackMat); riser.position.set(0,.90,-1.65); stage.add(riser);
+  for(let i=-3;i<=3;i++){
+    const person=new THREE.Group(); person.position.set(i*1.03,1.38,-1.52 + Math.abs(i)*.05); stage.add(person);
+    const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.12,.42,3,8),blackMat); person.add(torso);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(.145,12,10),blackMat); head.position.y=.42; person.add(head);
+    if(i!==0){ const stand=new THREE.Mesh(new THREE.BoxGeometry(.025,.72,.025),blackMat); stand.position.set(.20,.18,.08); stand.rotation.z=i<0?-.16:.16; person.add(stand); }
+  }
+  const backPracticalMat=new THREE.MeshBasicMaterial({color:0xffc66b,transparent:true,opacity:.88});
+  for(let i=-4;i<=4;i++){
+    const bulb=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),backPracticalMat); bulb.position.set(i*1.35,2.65,-3.35); stage.add(bulb);
+  }
+
+  // low audience silhouette line, kept below the stage sightline
+  const crowd=new THREE.Group(); crowd.position.set(0,.15,5.5); stage.add(crowd);
+  for(let i=0;i<42;i++){
+    const x=(i/41-.5)*18 + (Math.random()-.5)*.24;
+    const z=(Math.random()-.5)*1.4;
+    const h=.22+Math.random()*.25;
+    const person=new THREE.Mesh(new THREE.CapsuleGeometry(.08,.18+h,3,6),blackMat); person.position.set(x,h*.55,z); crowd.add(person);
+  }
+
+  /* ---------- Brand-kit Genesis object: liquid black + molten gold ---------- */
   const genesis = new THREE.Group();
-  genesis.position.set(0, 5.1, 0.4);
-  genesis.scale.setScalar(1.18);
+  genesis.position.set(3.55, 5.25, 1.15);
+  genesis.scale.setScalar(0.84);
   scene.add(genesis);
 
-  const N = innerWidth < 760 ? 360 : 520, M = 40;                 // rings along the band, points around the profile (even)
-  const R = 2.3, HALF_W = 0.92, HALF_T = 0.075;
-  const tilt = new THREE.Euler(0.95, 0.0, 0.28);
-  const tiltM = new THREE.Matrix4().makeRotationFromEuler(tilt);
-
-  const positions = new Float32Array(N * M * 3);
-  const idx = [];
-  for (let i = 0; i < N; i++) {
-    const ni = (i + 1) % N, wrap = ni === 0;
-    for (let k = 0; k < M; k++) {
-      const nk = (k + 1) % M;
-      const a = i * M + k, b = i * M + nk;
-      const c = ni * M + ((wrap ? k + M / 2 : k) % M);
-      const d = ni * M + ((wrap ? nk + M / 2 : nk) % M);
-      idx.push(a, c, b, b, c, d);
+  class LiquidLoop extends THREE.Curve {
+    constructor(phase=0, wobble=1){ super(); this.phase=phase; this.wobble=wobble; }
+    getPoint(t,target=new THREE.Vector3()){
+      const a=t*Math.PI*2, p=this.phase;
+      const r=2.72 + .34*Math.sin(a*3+p) + .15*Math.sin(a*7-p*.7);
+      const x=r*Math.cos(a);
+      const y=(2.06 + .18*Math.sin(a*2+p))*Math.sin(a) + .20*Math.sin(a*5+p);
+      const z=.62*Math.sin(a*2+p) + .26*Math.cos(a*4-p) + .12*Math.sin(a*9+p);
+      return target.set(x,y,z);
     }
   }
-  const band = new THREE.BufferGeometry();
-  band.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  band.setIndex(idx);
+  const goldMat = new THREE.MeshPhysicalMaterial({color:0xf3b94f,metalness:1,roughness:.105,clearcoat:1,clearcoatRoughness:.035,envMap,envMapIntensity:2.5,emissive:0x3d1d02,emissiveIntensity:.58});
+  const blackLiquidMat = new THREE.MeshPhysicalMaterial({color:0x030303,metalness:.96,roughness:.075,clearcoat:1,clearcoatRoughness:.025,envMap,envMapIntensity:2.15});
+  const champagneMat = new THREE.MeshPhysicalMaterial({color:0xffdf8f,metalness:1,roughness:.08,clearcoat:1,clearcoatRoughness:.02,envMap,envMapIntensity:2.8,emissive:0x4e2503,emissiveIntensity:.42});
 
-  // superellipse profile — soft, poured edges rather than a hard ribbon
-  const prof = [];
-  for (let k = 0; k < M; k++) {
-    const th = (k / M) * Math.PI * 2, c = Math.cos(th), s = Math.sin(th);
-    prof.push([Math.sign(c) * Math.pow(Math.abs(c), 0.42), Math.sign(s) * Math.pow(Math.abs(s), 0.42)]);
+  const liquidParts=[];
+  const loopSpecs=[
+    [new LiquidLoop(0.0), .43, blackLiquidMat, 0.0, 0.0, 0.0],
+    [new LiquidLoop(1.25), .34, goldMat, .08, .08, .16],
+    [new LiquidLoop(3.0), .22, champagneMat, -.05, -.12, -.13],
+    [new LiquidLoop(4.2), .16, goldMat, .04, .14, -.08]
+  ];
+  for(const [curve,rad,mat,ox,oy,oz] of loopSpecs){
+    const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve, innerWidth<760?180:260, rad, innerWidth<760?10:14, true),mat);
+    mesh.position.set(ox,oy,oz); genesis.add(mesh); liquidParts.push(mesh);
+  }
+  // black glass under-core makes the object read as liquid black/gold, not a clean gold ribbon
+  const core=new THREE.Mesh(new THREE.TorusGeometry(2.28,.34,18,180),blackLiquidMat.clone());
+  core.scale.set(1,.76,1); core.rotation.set(.92,.05,.28); core.material.roughness=.04; genesis.add(core); liquidParts.push(core);
+
+  // molten beads splashing off the mass
+  const beadGeo=new THREE.SphereGeometry(.075,20,14), beads=[];
+  for(let i=0;i<22;i++){
+    const b=new THREE.Mesh(beadGeo,i%4===0?champagneMat:goldMat);
+    const a=Math.random()*Math.PI*2, rr=3.1+Math.random()*1.9;
+    b.position.set(Math.cos(a)*rr,(Math.random()-.4)*4.8,Math.sin(a)*rr*.45);
+    const sc=.35+Math.random()*1.15; b.scale.set(sc,sc*(.65+Math.random()*.9),sc); genesis.add(b); beads.push(b);
   }
 
-  const drips = [0.18, 0.47, 0.81].map((u0, n) => ({ u0, phase: n * 2.3, len: 0 }));
-  const v = new THREE.Vector3();
-  const tmp = [];
-
-  function sculpt(t) {
-    const flow = t * 0.55;
-    for (let i = 0; i < N; i++) {
-      const u = (i / N) * Math.PI * 2;
-      const half = u / 2;
-      const swell = 1 + 0.1 * Math.sin(u * 2 + flow) + 0.035 * Math.sin(u * 5 - flow * 1.4);
-      const w = HALF_W * swell;
-      const th = HALF_T * (1.1 + 0.25 * Math.sin(u * 3 + flow * 0.8));
-      const cu = Math.cos(u), su = Math.sin(u), ch = Math.cos(half), sh = Math.sin(half);
-      for (let k = 0; k < M; k++) {
-        const px = prof[k][0] * w, py = prof[k][1] * th;
-        // rotate profile by half-angle in the (radial, z) plane
-        const rad = px * ch - py * sh;
-        const z = px * sh + py * ch;
-        const r = R + rad + 0.018 * Math.sin(u * 4 + flow * 1.2);
-        v.set(r * cu, r * su, z).applyMatrix4(tiltM);
-        // gravity: the lower half sags like warm metal
-        const low = Math.max(0, -v.y - 0.6);
-        v.y -= low * low * 0.07;
-        // drips forming along the underside
-        for (const d of drips) {
-          let du = Math.abs(i / N - d.u0); du = Math.min(du, 1 - du);
-          const g = Math.exp(-(du * du) / 0.00035);
-          if (g > 0.001 && v.y < -0.4) v.y -= g * d.len * Math.min(1, (-v.y - 0.4) * 1.5) * (0.6 + 0.4 * prof[k][1] * -1 + 0.4);
-          v.x += 0; // keep lateral
-        }
-        const o = (i * M + k) * 3;
-        positions[o] = v.x; positions[o + 1] = v.y; positions[o + 2] = v.z;
-      }
-    }
-    band.attributes.position.needsUpdate = true;
-    band.computeVertexNormals();
-  }
-
-  const goldMat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(1.0, 0.72, 0.33),
-    metalness: 1, roughness: 0.11,
-    clearcoat: 1, clearcoatRoughness: 0.05,
-    envMap, envMapIntensity: 2.1,
-    emissive: new THREE.Color(0x3a1c03), emissiveIntensity: 0.55,
-  });
-  const mobius = new THREE.Mesh(band, goldMat);
-  genesis.add(mobius);
-
-  // falling droplets
-  const dropGeo = new THREE.SphereGeometry(0.07, 24, 16);
-  const droplets = [];
-  for (let n = 0; n < 5; n++) {
-    const m = new THREE.Mesh(dropGeo, goldMat.clone());
-    m.material.transparent = true; m.visible = false; genesis.add(m);
-    droplets.push({ m, vy: 0, alive: false });
-  }
-  function releaseDrop(d) {
-    const i = Math.round(d.u0 * N) % N;
-    let lowest = null, ly = Infinity;
-    for (let k = 0; k < M; k++) { const o = (i * M + k) * 3; if (positions[o + 1] < ly) { ly = positions[o + 1]; lowest = o; } }
-    const slot = droplets.find(p => !p.alive); if (!slot) return;
-    slot.alive = true; slot.vy = 0; slot.m.visible = true; slot.m.material.opacity = 1;
-    slot.m.position.set(positions[lowest], positions[lowest + 1], positions[lowest + 2]);
-    slot.m.scale.set(1, 1.6, 1);
+  // slow liquid droplets shedding from the object
+  const dropGeo = new THREE.SphereGeometry(0.07, 20, 14);
+  const droplets=[];
+  for(let n=0;n<7;n++){
+    const m=new THREE.Mesh(dropGeo,n%3===0?champagneMat:goldMat.clone()); genesis.add(m);
+    droplets.push({m,seed:Math.random()*10,baseX:(Math.random()-.5)*4.1,baseZ:(Math.random()-.5)*1.8});
   }
 
   // halo orbits + gold dust
@@ -241,8 +217,8 @@ if (renderer) {
   pool.material.opacity = 0.22; pool.rotation.x = -Math.PI / 2; pool.position.set(0, 1.17, -0.8); scene.add(pool);
 
   // the only light in the room comes from the gold
-  const glow = new THREE.PointLight(0xffb45c, 30, 22, 1.7); glow.position.set(0, 4.6, 0.6); scene.add(glow);
-  const underGlow = new THREE.PointLight(0xff9a3a, 3.5, 12, 2); underGlow.position.set(0, 4.2, 4.5); scene.add(underGlow);
+  const glow = new THREE.PointLight(0xffb45c, 42, 26, 1.65); glow.position.set(0, 4.6, 0.6); scene.add(glow);
+  const underGlow = new THREE.PointLight(0xff9a3a, 7.5, 18, 1.85); underGlow.position.set(0, 4.2, 4.5); scene.add(underGlow);
   scene.add(new THREE.HemisphereLight(0x1a1410, 0x000000, 0.35));
 
   /* ---------- Post ---------- */
@@ -262,6 +238,10 @@ if (renderer) {
     // push the composition right on desktop so the headline owns the left third
     if (!mobile) camera.setViewOffset(w, h, -w * 0.17, 0, w, h); else camera.setViewOffset(w, h, 0, -h * 0.25, w, h);
     camera.fov = mobile ? 50 : 26;
+    stage.position.set(mobile ? 0 : 0.85, mobile ? -2.0 : -0.75, mobile ? -4.8 : -5.35);
+    stage.scale.setScalar(mobile ? 0.76 : 1.14);
+    genesis.position.x = mobile ? 0 : 3.55;
+    genesis.scale.setScalar(mobile ? 0.72 : 0.84);
     camera.updateProjectionMatrix();
     dustMat.uniforms.uPx.value = renderer.getPixelRatio();
   }
@@ -282,30 +262,23 @@ if (renderer) {
     const dt = Math.min(0.05, t - last); last = t;
     mx += (tx - mx) * 0.03; my += (ty - my) * 0.03;
 
-    // drips grow, stretch, then let go
-    for (const d of drips) {
-      const cyc = ((t * 0.22 + d.phase) % 3.2) / 3.2;
-      const prev = d.len;
-      d.len = Math.pow(cyc, 2.4) * 1.25;
-      if (!reduced && prev > 0.9 && d.len < prev) releaseDrop(d);
-    }
-    sculpt(t);
-    for (const p of droplets) {
-      if (!p.alive) continue;
-      p.vy -= 9.8 * dt * 0.35; p.m.position.y += p.vy * dt;
-      p.m.scale.y = 1.2 + Math.min(1.6, -p.vy * 0.5);
-      p.m.material.opacity = Math.max(0, Math.min(1, (p.m.position.y + 3.4) / 1.4));
-      if (p.m.position.y < -3.9) { p.alive = false; p.m.visible = false; }
-    }
+    liquidParts.forEach((p,i)=>{ p.rotation.z=Math.sin(t*.19+i)*.018; p.rotation.x=Math.cos(t*.16+i*.7)*.014; });
+    beads.forEach((b,i)=>{ b.position.y += Math.sin(t*.55+i*1.7)*.0009; b.rotation.y=t*(.06+(i%4)*.008); });
+    droplets.forEach((p,i)=>{
+      const cyc=((t*.12+p.seed)%1);
+      p.m.position.set(p.baseX,1.7-cyc*6.0,p.baseZ);
+      const fade=Math.sin(Math.PI*cyc); p.m.scale.set(.7,.75+cyc*2.2,.7); p.m.material.transparent=true; p.m.material.opacity=Math.max(0,fade*.78);
+    });
 
-    genesis.rotation.y = t * 0.16 + mx * 0.5;
-    genesis.rotation.x = Math.sin(t * 0.3) * 0.05 + my * 0.12;
-    genesis.position.y = (mobile ? 6.0 : 5.4) + Math.sin(t * 0.6) * 0.12;
+    genesis.rotation.y = 0.14 + Math.sin(t * 0.18) * 0.24 + mx * 0.24;
+    genesis.rotation.x = -0.08 + Math.sin(t * 0.27) * 0.055 + my * 0.08;
+    genesis.rotation.z = -0.10 + Math.sin(t * 0.13) * 0.055;
+    genesis.position.y = (mobile ? 5.15 : 5.25) + Math.sin(t * 0.55) * 0.10;
     orbits[0].rotation.z = t * 0.05; orbits[1].rotation.z = -t * 0.04;
     dustMat.uniforms.uTime.value = t;
     glow.intensity = 30 + Math.sin(t * 0.9) * 3;
 
-    camera.position.set(camBase.x + mx * 1.6, camBase.y - my * 0.8, camBase.z + (mobile ? 6 : 0));
+    camera.position.set(camBase.x + mx * 1.0, camBase.y - my * 0.55, camBase.z + (mobile ? 6 : 0));
     camera.lookAt(lookAt.x, lookAt.y + (mobile ? 0.6 : 0), lookAt.z);
     composer.render();
   }
