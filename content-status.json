@@ -1,0 +1,14 @@
+{
+  "status_legend": {
+    "verified": "Supported by supplied project/background materials and safe to retain in preview copy.",
+    "provisional": "Directional preview language requiring John Krishack's approval before final public launch."
+  },
+  "claims": [
+    {"id":"positioning-core","status":"verified","text":"Big Shack connects clients to talent, production resources and creative partners."},
+    {"id":"white-label","status":"verified","text":"Big Shack can support agency and white-label partnerships."},
+    {"id":"john-background-years","status":"provisional","text":"20+ years / nearly two decades around live and experiential production."},
+    {"id":"john-global","status":"provisional","text":"GLOBAL — artists, agencies, brands and venues."},
+    {"id":"background-brands","status":"provisional","text":"Bombardier, Adult Swim, Warner Music Group, SiriusXM, Adobe, FIFA and EventSpeak references."},
+    {"id":"turnkey","status":"provisional","text":"TURNKEY — production, logistics and partners."}
+  ]
+}

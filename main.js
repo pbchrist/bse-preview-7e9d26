@@ -17,6 +17,8 @@ try {
 
 if (renderer) {
   document.documentElement.classList.add('webgl-ready');
+  canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); document.documentElement.classList.remove('webgl-ready'); }, false);
+  canvas.addEventListener('webglcontextrestored', () => document.documentElement.classList.add('webgl-ready'), false);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.65));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -111,15 +113,6 @@ if (renderer) {
   fillRibbon.scale.setScalar(.998); mobius.add(fillRibbon);
   const ribbon = new THREE.Mesh(ribbonGeo, gold);
   mobius.add(ribbon);
-
-  // A soft inner echo adds liquid depth without changing the silhouette.
-  const echo = new THREE.Mesh(buildMobiusGeometry(innerWidth < 760 ? 150 : 230, innerWidth < 760 ? 14 : 22, 2.94, 1.02, 0.045), gold.clone());
-  echo.material.color.set(0x7e470f);
-  echo.material.envMapIntensity = 2.1;
-  echo.material.emissiveIntensity = 0.14;
-  echo.scale.setScalar(0.992);
-  echo.visible = false;
-  mobius.add(echo);
 
   mobius.rotation.set(0.79, -0.28, -0.20);
   scene.add(mobius);
