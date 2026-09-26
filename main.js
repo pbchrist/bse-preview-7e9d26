@@ -4,7 +4,7 @@ const canvas = document.querySelector('#genesis');
 const hero = document.querySelector('.hero');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const scene = new THREE.Scene();
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, powerPreference:'high-performance'});
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, preserveDrawingBuffer:true, powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -13,7 +13,7 @@ const camera = new THREE.PerspectiveCamera(33, 1, .1, 100);
 camera.position.set(0, .15, 12);
 
 const world = new THREE.Group();
-world.position.set(2.8, .6, 0);
+world.position.set(2.25, .6, 0);
 scene.add(world);
 
 function mobiusGeometry(segments=420, widthSegments=22, radius=2.35, halfWidth=.48){
@@ -78,7 +78,7 @@ const white=new THREE.PointLight(0xfff1c9,50,10,2);white.position.set(1,1,-3);sc
 
 let mouseX=0,mouseY=0,targetX=0,targetY=0;
 window.addEventListener('pointermove',e=>{targetX=(e.clientX/innerWidth-.5)*2;targetY=(e.clientY/innerHeight-.5)*2},{passive:true});
-function resize(){const w=hero.clientWidth,h=hero.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const mobile=w<720;world.position.set(mobile?0:2.8,mobile?-1.0:.6,0);world.scale.setScalar(mobile?.68:1)}
+function resize(){const w=hero.clientWidth,h=hero.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const mobile=w<720;world.position.set(mobile?0:2.25,mobile?-1.0:.6,0);world.scale.setScalar(mobile?.68:1)}
 new ResizeObserver(resize).observe(hero);resize();
 const clock=new THREE.Clock();
 function tick(){const t=clock.getElapsedTime();mouseX+=(targetX-mouseX)*.025;mouseY+=(targetY-mouseY)*.025;if(!reduced){mobius.rotation.y=t*.18+mouseX*.22;mobius.rotation.x=.72+Math.sin(t*.35)*.08+mouseY*.12;mobius.rotation.z=-.3+Math.sin(t*.21)*.11;inner.rotation.copy(mobius.rotation);points.rotation.y=-t*.035;points.rotation.z=Math.sin(t*.09)*.14;stage.rotation.y=Math.sin(t*.12)*.04;world.position.y+=(Math.sin(t*.5)*.03-world.position.y+(innerWidth<720?-1.0:.6))*.006;}renderer.render(scene,camera);requestAnimationFrame(tick)}tick();
