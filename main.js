@@ -5,6 +5,7 @@ const hero = document.querySelector('.hero');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, preserveDrawingBuffer:true, powerPreference:'high-performance'});
+document.documentElement.classList.add('webgl-ready');
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
