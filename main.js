@@ -1,9 +1,9 @@
-import * as THREE from 'three';
-import { EffectComposer } from './vendor/postprocessing/EffectComposer.js';
-import { RenderPass } from './vendor/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from './vendor/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from './vendor/postprocessing/OutputPass.js';
-
+async function initGenesis(){
+  const THREE = await import('three');
+  const { EffectComposer } = await import('./vendor/postprocessing/EffectComposer.js');
+  const { RenderPass } = await import('./vendor/postprocessing/RenderPass.js');
+  const { UnrealBloomPass } = await import('./vendor/postprocessing/UnrealBloomPass.js');
+  const { OutputPass } = await import('./vendor/postprocessing/OutputPass.js');
 const canvas = document.querySelector('#genesis');
 const mobiusSection = document.querySelector('.mobius-section');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -212,6 +212,17 @@ if (renderer) {
     if (!renderedOnce) { renderedOnce = true; document.documentElement.classList.add('webgl-ready'); }
   }
   tick();
+}
+
+}
+
+const genesisSection=document.querySelector('.mobius-section');
+if(genesisSection){
+  const startGenesis=()=>initGenesis().catch(()=>document.documentElement.classList.add('no-webgl'));
+  if('IntersectionObserver' in window){
+    const genesisObserver=new IntersectionObserver((entries,obs)=>{if(entries.some(e=>e.isIntersecting)){obs.disconnect();startGenesis();}},{rootMargin:'160px 0px'});
+    genesisObserver.observe(genesisSection);
+  }else{addEventListener('load',startGenesis,{once:true});}
 }
 
 const menu=document.querySelector('#menuToggle'), nav=document.querySelector('#mobileNav');
