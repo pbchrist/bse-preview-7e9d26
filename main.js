@@ -5,7 +5,7 @@ import { UnrealBloomPass } from './vendor/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from './vendor/postprocessing/OutputPass.js';
 
 const canvas = document.querySelector('#genesis');
-const hero = document.querySelector('.hero');
+const mobiusSection = document.querySelector('.mobius-section');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let renderer;
@@ -43,14 +43,14 @@ if (renderer) {
   panel(10, 2, 0xe77b18, 3.5, [0, -5, 4], [0.45, 0, 0]);
   const envMap = pmrem.fromScene(envScene, 0.025).texture;
 
-  function buildMobiusGeometry(segments = 300, across = 26, radius = 3.0, halfWidth = 1.08, thickness = 0.095) {
+  function buildMobiusGeometry(segments = 300, across = 26, radius = 3.0, halfWidth = 1.18, thickness = 0.095) {
     const positions = [];
     const indices = [];
     const layerSize = (segments + 1) * across;
 
     function point(u, v) {
       const cu = Math.cos(u), su = Math.sin(u), ch = Math.cos(u * 0.5), sh = Math.sin(u * 0.5);
-      const breathing = 1 + 0.018 * Math.cos(u * 3) - 0.012 * Math.sin(u * 5);
+      const breathing = 1 + 0.062 * Math.cos(u * 3 - 0.25) - 0.018 * Math.sin(u * 5);
       const rr = radius * breathing + v * ch;
       return new THREE.Vector3(rr * cu, v * sh, rr * su);
     }
@@ -94,19 +94,22 @@ if (renderer) {
 
   const gold = new THREE.MeshPhysicalMaterial({
     color: 0xe9aa3f,
-    metalness: 1,
-    roughness: 0.07,
+    metalness: 0.94,
+    roughness: 0.085,
     clearcoat: 1,
     clearcoatRoughness: 0.025,
     envMap,
-    envMapIntensity: 3.5,
+    envMapIntensity: 3.0,
     emissive: new THREE.Color(0x3c1a01),
-    emissiveIntensity: 0.34,
+    emissiveIntensity: 0.12,
     side: THREE.DoubleSide
   });
 
   const mobius = new THREE.Group();
-  const ribbon = new THREE.Mesh(buildMobiusGeometry(innerWidth < 760 ? 190 : 320, innerWidth < 760 ? 18 : 30), gold);
+  const ribbonGeo = buildMobiusGeometry(innerWidth < 760 ? 190 : 320, innerWidth < 760 ? 18 : 30);
+  const fillRibbon = new THREE.Mesh(ribbonGeo, new THREE.MeshBasicMaterial({ color:0xa46018, transparent:true, opacity:.43, side:THREE.DoubleSide }));
+  fillRibbon.scale.setScalar(.998); mobius.add(fillRibbon);
+  const ribbon = new THREE.Mesh(ribbonGeo, gold);
   mobius.add(ribbon);
 
   // A soft inner echo adds liquid depth without changing the silhouette.
@@ -115,13 +118,14 @@ if (renderer) {
   echo.material.envMapIntensity = 2.1;
   echo.material.emissiveIntensity = 0.14;
   echo.scale.setScalar(0.992);
+  echo.visible = false;
   mobius.add(echo);
 
-  mobius.rotation.set(0.22, -0.34, -0.17);
+  mobius.rotation.set(0.79, -0.28, -0.20);
   scene.add(mobius);
 
   // Orbiting filament energy and star-like points.
-  const orbitMat = new THREE.MeshBasicMaterial({ color: 0xffc96d, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false });
+  const orbitMat = new THREE.MeshBasicMaterial({ color: 0xffc96d, transparent: true, opacity: 0.085, blending: THREE.AdditiveBlending, depthWrite: false });
   const orbits = [];
   [[4.1, 1.22, 0.18, 0.12], [4.55, 1.05, -0.28, -0.42], [3.85, 1.46, 0.36, 0.72]].forEach(([r, x, y, z], i) => {
     const o = new THREE.Mesh(new THREE.TorusGeometry(r, i === 0 ? 0.012 : 0.007, 7, 360), orbitMat.clone());
@@ -161,52 +165,54 @@ if (renderer) {
   grad.addColorStop(0,'rgba(255,201,105,.40)'); grad.addColorStop(.22,'rgba(242,158,49,.16)'); grad.addColorStop(.62,'rgba(150,72,10,.035)'); grad.addColorStop(1,'rgba(0,0,0,0)');
   hg.fillStyle=grad; hg.fillRect(0,0,256,256);
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:new THREE.CanvasTexture(haloCanvas), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, opacity:.86 }));
-  halo.scale.set(13,13,1); halo.position.z=-1.4; mobius.add(halo);
+  halo.scale.set(8.2,8.2,1); halo.position.z=-1.4; halo.material.opacity=.06; mobius.add(halo);
 
-  const key = new THREE.PointLight(0xffbf62, 16, 18, 1.65); key.position.set(-1.5,2.5,4.5); scene.add(key);
-  const rim = new THREE.PointLight(0xffe2a0, 11, 16, 1.9); rim.position.set(3.6,-1.5,4); scene.add(rim);
+  scene.add(new THREE.AmbientLight(0xffb85f, 0.72));
+  const fill = new THREE.DirectionalLight(0xffe0a0, 1.35); fill.position.set(0,4,8); scene.add(fill);
+  const key = new THREE.PointLight(0xffbf62, 3.8, 18, 1.65); key.position.set(-1.5,2.5,4.5); scene.add(key);
+  const rim = new THREE.PointLight(0xffe2a0, 3.2, 16, 1.9); rim.position.set(3.6,-1.5,4); scene.add(rim);
 
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1,1), 1.1, 0.56, 0.64);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(1,1), 0.31, 0.38, 0.83);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 
   let mobile = false;
   function resize(){
-    const w=hero.clientWidth, h=hero.clientHeight;
+    const w=mobiusSection.clientWidth, h=mobiusSection.clientHeight;
     mobile=w<760;
     renderer.setSize(w,h,false); composer.setSize(w,h); bloom.setSize(w,h);
     camera.aspect=w/h;
     camera.fov=mobile?36:31;
     camera.updateProjectionMatrix();
     if(mobile){
-      mobius.position.set(0,-3.0,0);
-      mobius.scale.setScalar(.68);
-      camera.position.z=14.7;
+      mobius.position.set(0,0,0);
+      mobius.scale.setScalar(.72);
+      camera.position.z=14.2;
     }else{
-      mobius.position.set(3.4,.55,0);
-      mobius.scale.setScalar(1.0);
-      camera.position.z=13.2;
+      mobius.position.set(0,0.1,0);
+      mobius.scale.setScalar(1.02);
+      camera.position.z=13.0;
     }
     dustMat.uniforms.uPx.value=renderer.getPixelRatio();
   }
-  new ResizeObserver(resize).observe(hero); resize();
+  new ResizeObserver(resize).observe(mobiusSection); resize();
 
   let tx=0,ty=0,mx=0,my=0;
   addEventListener('pointermove',e=>{tx=e.clientX/innerWidth-.5;ty=e.clientY/innerHeight-.5;},{passive:true});
   let visible=true;
-  new IntersectionObserver(([e])=>visible=e.isIntersecting).observe(hero);
+  new IntersectionObserver(([e])=>visible=e.isIntersecting).observe(mobiusSection);
   const clock=new THREE.Clock();
   function tick(){
     requestAnimationFrame(tick);
     if(!visible) return;
     const t=reduced?2.5:clock.getElapsedTime();
     mx+=(tx-mx)*.035; my+=(ty-my)*.035;
-    mobius.rotation.y=-.34 + Math.sin(t*.18)*.08 + mx*.14;
-    mobius.rotation.x=.22 + Math.sin(t*.22)*.045 + my*.07;
-    mobius.rotation.z=-.17 + Math.sin(t*.13)*.028;
-    mobius.position.y=(mobile?-3.0:.55)+Math.sin(t*.55)*.07;
+    mobius.rotation.y=-.28 + Math.sin(t*.18)*.05 + mx*.09;
+    mobius.rotation.x=.79 + Math.sin(t*.22)*.035 + my*.05;
+    mobius.rotation.z=-.20 + Math.sin(t*.13)*.022;
+    mobius.position.y=(mobile?0:.1)+Math.sin(t*.55)*.06;
     orbits[0].rotation.z=t*.045; orbits[1].rotation.z=-t*.035; orbits[2].rotation.z=t*.026;
     dustMat.uniforms.uTime.value=t;
     composer.render();
@@ -220,7 +226,7 @@ nav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.hidden
 const header=document.querySelector('.site-header');
 const onScroll=()=>header.classList.toggle('scrolled',scrollY>40);
 addEventListener('scroll',onScroll,{passive:true});onScroll();
-const revealEls=[...document.querySelectorAll('.section-head,.cap-grid article,.proof-row b,.about-copy,.about-orbit,.partner-copy,.partner-cards article,.contact>*')];
+const revealEls=[...document.querySelectorAll('.section-head,.cap-grid article,.proof-row b,.about-copy,.about-photo,.partner-copy,.partner-cards article,.contact>*')];
 revealEls.forEach(el=>{el.style.opacity='0';el.style.transform='translateY(22px)';});
 const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.animate([{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'translateY(0)'}],{duration:750,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'});io.unobserve(e.target);}}),{threshold:.12});
 revealEls.forEach(el=>io.observe(el));
